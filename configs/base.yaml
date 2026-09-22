@@ -1,0 +1,24 @@
+# Base configuration for V1 prototype
+# Values are placeholders - to be finalized after dataset inspection
+
+dataset:
+  source: sentinel-2-l2a
+  region: mumbai
+  bbox: [72.8062, 19.0084, 72.9492, 19.1436]  # [west, south, east, north]
+  band: B04
+  date_range: ["2025-12-01", "2026-02-28"]
+  max_cloud_cover: 10
+
+patch_size: 256
+
+input_channels: 2
+output_channels: 1
+base_features: 32
+
+batch_size: 8
+learning_rate: 0.001
+epochs: 50
+
+missing_ratio:
+  min: 0.05
+  max: 0.40

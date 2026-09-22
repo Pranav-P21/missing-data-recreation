@@ -1,0 +1,6 @@
+rasterio
+pystac-client
+numpy
+torch
+pyyaml
+matplotlib
