@@ -1,0 +1,21 @@
+# Data
+data/raw/*
+data/processed/*
+data/patches/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/patches/.gitkeep
+
+# Experiments
+experiments/*
+!experiments/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.env
+
+# OS
+.DS_Store
