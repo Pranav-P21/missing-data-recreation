@@ -1,16 +1,23 @@
 import sys, os
-import torch
 sys.path.append(os.path.abspath("."))
+
+import torch
+import glob
+
+torch.manual_seed(42)
 
 from src.data.dataset import SatellitePatchDataset
 from src.models.unet import UNet
 from src.training.trainer import train_model
 
+num_patches = len(glob.glob("data/patches/patch_*.npy"))
+print(f"Training on {num_patches} patches")
+
 dataset = SatellitePatchDataset(
     patches_dir="data/patches",
     damaged_dir="data/damaged",
     masks_dir="data/masks",
-    num_patches=15,
+    num_patches=num_patches,
 )
 
 model = UNet(input_channels=2, output_channels=1, base_features=32)
