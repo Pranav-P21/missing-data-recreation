@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import glob
+
 
 def apply_random_block_mask(patch, rng, n_holes=(1, 3), hole_size=(20, 80)):
     mask = np.ones_like(patch)
@@ -14,7 +16,12 @@ def apply_random_block_mask(patch, rng, n_holes=(1, 3), hole_size=(20, 80)):
     damaged = patch * mask
     return damaged, mask
 
-# --- Step 1: single-patch visual test (already done, keep for reference) ---
+
+# --- find how many patches actually exist ---
+num_patches = len(glob.glob("data/patches/patch_*.npy"))
+print(f"Found {num_patches} patches")
+
+# --- single-patch visual test (kept for reference) ---
 patch = np.load("data/patches/patch_005.npy")
 print("Loaded patch shape:", patch.shape)
 
@@ -32,15 +39,14 @@ axes[1].imshow(mask, cmap="gray"); axes[1].set_title("Mask (1=keep, 0=missing)")
 axes[2].imshow(damaged, cmap="gray"); axes[2].set_title("Damaged")
 plt.savefig("notebooks/masking_preview.png")
 plt.show()
-print("Past the plot, starting patch loop...")
 
-# --- Step 2 & 3: apply masking to all 15 patches and save ---
+# --- apply masking to ALL patches and save ---
 os.makedirs("data/damaged", exist_ok=True)
 os.makedirs("data/masks", exist_ok=True)
 
 rng = np.random.default_rng(seed=42)
 
-for idx in range(15):
+for idx in range(num_patches):
     try:
         print(f"Processing patch {idx}...")
         p = np.load(f"data/patches/patch_{idx:03d}.npy")
@@ -51,5 +57,4 @@ for idx in range(15):
         print(f"ERROR on patch {idx}: {e}")
         break
 
-print("Saved damaged patches and masks for all 15 patches")
-
+print(f"Saved damaged patches and masks for all {num_patches} patches")
