@@ -53,6 +53,7 @@ val_dataset = SatellitePatchDataset(
     augment=False,
 )
 
+# --- average PSNR over full val set ---
 total_psnr = 0.0
 with torch.no_grad():
     for x, y in val_dataset:
@@ -61,26 +62,36 @@ with torch.no_grad():
 avg_psnr = total_psnr / len(val_dataset)
 print(f"Average PSNR over {len(val_dataset)} val patches: {avg_psnr:.2f} dB")
 
-i = 0  # index into val_dataset (0 = first held-out patch); not a raw patch idx
-x, y = val_dataset[i]
+# --- 3 randomly selected val patches, shown side by side ---
+random.seed()  # true randomness this time, not seed 42 - we want variety, not reproducibility here
+sample_indices = random.sample(range(len(val_dataset)), min(3, len(val_dataset)))
 
-with torch.no_grad():
-    pred = model(x.unsqueeze(0))
+fig, axes = plt.subplots(len(sample_indices), 4, figsize=(16, 4 * len(sample_indices)))
 
-damaged_img = x[0].numpy()
-mask_img = x[1].numpy()
-clean_img = y[0].numpy()
-pred_img = pred[0, 0].numpy()
+for row, i in enumerate(sample_indices):
+    x, y = val_dataset[i]
+    with torch.no_grad():
+        pred = model(x.unsqueeze(0))
 
-fig, axes = plt.subplots(1, 4, figsize=(16, 4))
-axes[0].imshow(clean_img, cmap="gray"); axes[0].set_title("Original (ground truth)")
-axes[1].imshow(damaged_img, cmap="gray"); axes[1].set_title("Damaged input")
-axes[2].imshow(mask_img, cmap="gray"); axes[2].set_title("Mask")
-axes[3].imshow(pred_img, cmap="gray"); axes[3].set_title(f"Prediction ({MODEL_PATH})")
-plt.suptitle(f"Held-out val patch (patch_id={val_ids[i]:03d}, grid_pos={grid_position_of(val_ids[i])})")
+    damaged_img = x[0].numpy()
+    mask_img = x[1].numpy()
+    clean_img = y[0].numpy()
+    pred_img = pred[0, 0].numpy()
+    patch_psnr = psnr(pred, y.unsqueeze(0))
+
+    titles = ["Original (ground truth)", "Damaged input", "Mask", f"Prediction ({patch_psnr:.2f} dB)"]
+    imgs = [clean_img, damaged_img, mask_img, pred_img]
+
+    for col in range(4):
+        ax = axes[row, col] if len(sample_indices) > 1 else axes[col]
+        ax.imshow(imgs[col], cmap="gray")
+        ax.set_title(titles[col])
+        if col == 0:
+            ax.set_ylabel(f"patch_{val_ids[i]:03d} (grid_pos={grid_position_of(val_ids[i])})", fontsize=10)
+
+plt.suptitle(f"3 random held-out val patches - avg PSNR: {avg_psnr:.2f} dB")
 plt.tight_layout()
 plt.savefig(OUTPUT_IMAGE)
 plt.show()
 
-print(f"Evaluated on val patch_{val_ids[i]:03d} (grid position {grid_position_of(val_ids[i])})")
 print(f"Saved evaluation to {OUTPUT_IMAGE}")

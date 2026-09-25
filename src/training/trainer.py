@@ -17,7 +17,7 @@ def train_model(model, train_dataset, val_dataset, epochs=20, batch_size=4, lr=1
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     from src.training.losses import CombinedLoss
-    criterion = CombinedLoss(alpha=0.5)
+    criterion = CombinedLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
 
